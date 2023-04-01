@@ -1,0 +1,43 @@
+html {
+    background-color: rgb(140, 74, 74);
+}
+
+body {
+    height: 100%;
+    background-color: rgba(74, 48, 169, 0.622);
+}
+h1 {
+    position: relative;
+    color: white;
+}
+
+div {
+   position: absolute;
+    height: 80%;
+    width: 37%;
+    top: 100px;
+}
+
+#div0 {
+    background-color: rgb(145, 108, 108);
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    margin-left: 10%;
+}
+
+#div1 {
+    background-color: rgba(81, 60, 60, 0.51);
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    margin-left: 50%;  
+}
+
+span {
+    
+    position: fixed;
+    background-color: rgb(224, 255, 210);
+    border-color: black;
+    border-style: solid;
+    font-size: 20px;
+    padding: 5px;
+}
