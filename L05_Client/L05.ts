@@ -10,83 +10,74 @@ namespace todo05 {
 
     window.addEventListener("load", handleLoad);
 
-    
     export interface Input {
         item: string;
-        amount: number;
+        date: Date;
         comment: string;
-        date: string;
+        urgent: boolean;
     }
 
-   
+    let addButton: HTMLDivElement = <HTMLDivElement>document.getElementById("addButton");
+    addButton.addEventListener("click", handleButton);
+
+    // neues ToDo speichern
+    function handleButton(): void {
+        sendData();
+
+        // temporäre Funktion zum hinzufügen von neuen ToDos (wird nach Serveranbindung ersetzt)
+        addData();
+        clearInputs();
+        console.log("Button works!");
+    }
+
+    // json file lesen/ parsen
     async function handleLoad(): Promise<void> {
-        let button: HTMLButtonElement = <HTMLButtonElement>document.querySelector("button[type=button]");
         let response: Response = await fetch("data.json");
         let entry: string = await response.text();
         let data: Input[] = JSON.parse(entry);
-        button.addEventListener("click", handleButton);
+        console.log("handleLoad works!");
         clearInputs();
         loadData(data);
     }
 
-    
-    function handleButton(): void {
-        loadInput();
-        sendData();
-    }
-
-    
+    // neue ToDos/ Daten vom "Formular" an Server senden
     async function sendData(): Promise<void> {
         let formData: FormData = new FormData(document.forms[0]);
         let query: URLSearchParams = new URLSearchParams(<any>formData);
-        await fetch("L05.html?" + query.toString());
-        alert("Data sent");
+        let response: Response = await fetch("L05.html?" + query.toString());
+
     }
 
-    
+    // daten bestehenden ToDos zwischenspeichern in Variablen
     function loadData(data: Input[]): void {
         for (let index: number = 0; index < data.length; index++) {
             let item: string = data[index].item;
-            let amount: number = data[index].amount;
-            let date: string = data[index].date;
+            let date: Date = data[index].date;
+            let urgent: boolean = data[index].urgent;
             let comment: string = data[index].comment;
-            
-            loadItem(item, amount, date, comment);
+
+            loadItem(item, date.toString(), urgent, comment);
         }
     }
 
-    
-    function loadInput(): void {
-        let formData: FormData = new FormData(document.forms[0]);
-        let item: string = formData.get("Item").toString();
-        let amount: number = Number(formData.get("Amount"));
-        let date: string = new Date().toLocaleDateString();
-        let comment: string = formData.get("Area").toString();
+    // bestehende ToDos laden
+    function loadItem(item: string, date: string, urgent: boolean, comment: string): void {
+        let output: HTMLDivElement = <HTMLDivElement>document.querySelector("#output");
 
-       
-        let dringendCheckbox: FormDataEntryValue = formData.get("Checkbox");
-        let dringend: string = "";
-        if (dringendCheckbox == null) {
-            dringend? = "";
+        let isUrgent: string = "";
+        if (urgent == true) {
+            isUrgent = "Dringend!";
         } else {
-            dringend? = " dringend";
+            isUrgent = "Nicht dringend!";
         }
 
-        
-        clearInputs();
+        let newDiv: HTMLDivElement = <HTMLDivElement>document.createElement("div");
 
-        
-        loadItem(item, amount, date, comment, dringend);
-    }
+        let createP: HTMLParagraphElement = <HTMLParagraphElement>document.createElement("p");
+        let finalString: string = date + " " + item + " " + isUrgent + " " + comment;
+        createP.innerHTML = finalString;
 
-    
-    function loadItem(item: string, amount: number, date: string, comment: string, purchase: string): void {
-        let newDiv: HTMLDivElement = document.createElement("div");
-        newDiv.id = "createDiv";
-        let parent: Element = document.querySelector("#output");
-        newDiv.className = "genoutput";
-        newDiv.innerHTML = date + " " + amount + " " + item + " " + comment + ";
-        parent.appendChild(newDiv);
+        newDiv.appendChild(createP);
 
         let newContainer: HTMLDivElement = document.createElement("div");
         newContainer.id = "containerIcons";
@@ -96,47 +87,52 @@ namespace todo05 {
         newCheckbox.type = "checkbox";
         newContainer.appendChild(newCheckbox);
 
-        let newEdit: HTMLDivElement = document.createElement("div");
-        newEdit.innerHTML = "<img id='edit' src='./pen-solid.svg'>";
-        newContainer.appendChild(newEdit);
-
+        // "Trash" Bild mit Löschfunktion einfügen
         let newTrash: HTMLDivElement = document.createElement("div");
         newTrash.innerHTML = "<img id='trash' src='./trash-solid.svg'>";
-        newCheckbox.id = "trash";
+        newCheckbox.id = "done";
         newContainer.appendChild(newTrash);
 
-        newEdit.addEventListener("click", function (): void {
-            editItem(newDiv, item, amount, comment);
-        });
-
-        newTrash.addEventListener("click", function (): void {
+        newTrash.addEventListener("click", () => {
             deleteItem(newDiv);
         });
+
+        output.appendChild(newDiv);
+
     }
 
-    
+    // deleting existing ToDo
     function deleteItem(newDiv: HTMLDivElement): void {
         newDiv.parentElement.removeChild(newDiv);
     }
 
-    
-    function editItem(newDiv: HTMLDivElement, item: string, amount: number, comment: string): void {
-        let itemx: HTMLInputElement = document.querySelector("input#inputx");
-        itemx.value = item;
-        let amountx: HTMLInputElement = document.querySelector("input#amountx");
-        amountx.value = amount.toString();
-        let commentx: HTMLInputElement = document.querySelector("input#commentx");
-        commentx.value = comment;
-        deleteItem(newDiv);
+    // neues ToDo mit den aktuellen Werten der Input-Felder hinzufügen
+    function addData(): void {
+
+        let itemx: HTMLInputElement = <HTMLInputElement>document.querySelector("#itemx");
+        let datex: HTMLInputElement = <HTMLInputElement>document.querySelector("#datex");
+        let urgentx: HTMLInputElement = <HTMLInputElement>document.querySelector("#urgentx");
+        let commentx: HTMLInputElement = <HTMLInputElement>document.querySelector("#commentx");
+
+        // datex zu Typ Date konvertieren um String angepasst auszugeben
+        let date: Date = new Date(datex.value);
+        let formatDate: string = date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear();
+
+        if (itemx.value != "") {
+            loadItem(itemx.value, formatDate, urgentx.checked, commentx.value);
+
+        }
     }
 
-    
+    // bisherige Inputs leereen, damit die vorherigen nicht weiter bestehen
     function clearInputs(): void {
-        let itemx: HTMLInputElement = document.querySelector("input#inputx");
+        let itemx: HTMLInputElement = <HTMLInputElement>document.querySelector("#itemx");
         itemx.value = "";
-        let amountx: HTMLInputElement = document.querySelector("input#amountx");
-        amountx.value = "";
-        let commentx: HTMLInputElement = document.querySelector("input#commentx");
+        let datex: HTMLInputElement = <HTMLInputElement>document.querySelector("#datex");
+        datex.value = "";
+        let urgentx: HTMLInputElement = <HTMLInputElement>document.querySelector("#urgentx");
+        urgentx.checked = false;
+        let commentx: HTMLInputElement = <HTMLInputElement>document.querySelector("#commentx");
         commentx.value = "";
     }
 }

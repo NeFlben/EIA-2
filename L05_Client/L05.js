@@ -17,100 +17,102 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var todo05;
 (function (todo05) {
     window.addEventListener("load", handleLoad);
+    let addButton = document.getElementById("addButton");
+    addButton.addEventListener("click", handleButton);
+    // neues ToDo speichern
+    function handleButton() {
+        sendData();
+        // temporäre Funktion zum hinzufügen von neuen ToDos (wird nach Serveranbindung ersetzt)
+        addData();
+        clearInputs();
+        console.log("Button works!");
+    }
+    // json file lesen/ parsen
     function handleLoad() {
         return __awaiter(this, void 0, void 0, function* () {
-            let button = document.querySelector("button[type=button]");
             let response = yield fetch("data.json");
             let entry = yield response.text();
             let data = JSON.parse(entry);
-            button.addEventListener("click", handleButton);
+            console.log("handleLoad works!");
             clearInputs();
             loadData(data);
         });
     }
-    function handleButton() {
-        loadInput();
-        sendData();
-    }
+    // neue ToDos/ Daten vom "Formular" an Server senden
     function sendData() {
         return __awaiter(this, void 0, void 0, function* () {
             let formData = new FormData(document.forms[0]);
             let query = new URLSearchParams(formData);
-            yield fetch("L05.html?" + query.toString());
-            alert("Data sent");
+            let response = yield fetch("L05.html?" + query.toString());
         });
     }
+    // daten bestehenden ToDos zwischenspeichern in Variablen
     function loadData(data) {
         for (let index = 0; index < data.length; index++) {
             let item = data[index].item;
-            let amount = data[index].amount;
             let date = data[index].date;
+            let urgent = data[index].urgent;
             let comment = data[index].comment;
-            loadItem(item, amount, date, comment);
+            loadItem(item, date.toString(), urgent, comment);
         }
     }
-    function loadInput() {
-        let formData = new FormData(document.forms[0]);
-        let item = formData.get("Item").toString();
-        let amount = Number(formData.get("Amount"));
-        let date = new Date().toLocaleDateString();
-        let comment = formData.get("Area").toString();
-        let dringendCheckbox = formData.get("Checkbox");
-        let dringend = "";
-        if (dringendCheckbox == null) {
-            dringend ?  = "" : ;
+    // bestehende ToDos laden
+    function loadItem(item, date, urgent, comment) {
+        let output = document.querySelector("#output");
+        let isUrgent = "";
+        if (urgent == true) {
+            isUrgent = "Dringend!";
         }
         else {
-            dringend ?  = " dringend" : ;
+            isUrgent = "Nicht dringend!";
         }
-        clearInputs();
-        loadItem(item, amount, date, comment, dringend);
-    }
-    function loadItem(item, amount, date, comment, purchase) {
         let newDiv = document.createElement("div");
-        newDiv.id = "createDiv";
-        let parent = document.querySelector("#output");
-        newDiv.className = "genoutput";
-        newDiv.innerHTML = date + " " + amount + " " + item + " " + comment + ";;
-        parent.appendChild(newDiv);
+        let createP = document.createElement("p");
+        let finalString = date + " " + item + " " + isUrgent + " " + comment;
+        createP.innerHTML = finalString;
+        newDiv.appendChild(createP);
         let newContainer = document.createElement("div");
         newContainer.id = "containerIcons";
         newDiv.appendChild(newContainer);
         let newCheckbox = document.createElement("input");
         newCheckbox.type = "checkbox";
         newContainer.appendChild(newCheckbox);
-        let newEdit = document.createElement("div");
-        newEdit.innerHTML = "<img id='edit' src='./pen-solid.svg'>";
-        newContainer.appendChild(newEdit);
+        // "Trash" Bild mit Löschfunktion einfügen
         let newTrash = document.createElement("div");
         newTrash.innerHTML = "<img id='trash' src='./trash-solid.svg'>";
-        newCheckbox.id = "trash";
+        newCheckbox.id = "done";
         newContainer.appendChild(newTrash);
-        newEdit.addEventListener("click", function () {
-            editItem(newDiv, item, amount, comment);
-        });
-        newTrash.addEventListener("click", function () {
+        newTrash.addEventListener("click", () => {
             deleteItem(newDiv);
         });
+        output.appendChild(newDiv);
     }
+    // deleting existing ToDo
     function deleteItem(newDiv) {
         newDiv.parentElement.removeChild(newDiv);
     }
-    function editItem(newDiv, item, amount, comment) {
-        let itemx = document.querySelector("input#inputx");
-        itemx.value = item;
-        let amountx = document.querySelector("input#amountx");
-        amountx.value = amount.toString();
-        let commentx = document.querySelector("input#commentx");
-        commentx.value = comment;
-        deleteItem(newDiv);
+    // neues ToDo mit den aktuellen Werten der Input-Felder hinzufügen
+    function addData() {
+        let itemx = document.querySelector("#itemx");
+        let datex = document.querySelector("#datex");
+        let urgentx = document.querySelector("#urgentx");
+        let commentx = document.querySelector("#commentx");
+        // datex zu Typ Date konvertieren um String angepasst auszugeben
+        let date = new Date(datex.value);
+        let formatDate = date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear();
+        if (itemx.value != "") {
+            loadItem(itemx.value, formatDate, urgentx.checked, commentx.value);
+        }
     }
+    // bisherige Inputs leereen, damit die vorherigen nicht weiter bestehen
     function clearInputs() {
-        let itemx = document.querySelector("input#inputx");
+        let itemx = document.querySelector("#itemx");
         itemx.value = "";
-        let amountx = document.querySelector("input#amountx");
-        amountx.value = "";
-        let commentx = document.querySelector("input#commentx");
+        let datex = document.querySelector("#datex");
+        datex.value = "";
+        let urgentx = document.querySelector("#urgentx");
+        urgentx.checked = false;
+        let commentx = document.querySelector("#commentx");
         commentx.value = "";
     }
 })(todo05 || (todo05 = {}));

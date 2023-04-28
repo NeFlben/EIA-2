@@ -1,15 +1,14 @@
-[{
-    "item": "Joesf ",
-    "comment": " Pfand wegbringen",
-    "date": "13.04.2023 ",
-    "dringend?": ""
-  
-},
-{
-    "item": "Tom ",
-    "comment": " Bad Putzen ",
-    "date": "14.04.2023  ",
-    "dringend?": " dringend"
-}
-
+[
+    {
+        "item": "Joesf ",
+        "date": "14.04.2023",
+        "urgent": false,
+        "comment": "Pfand wegbringen"
+    },
+    {
+        "item": "Tom",
+        "date": "14.04.2023",
+        "urgent": true,
+        "comment": "Bad Putzen"
+    }
 ]
